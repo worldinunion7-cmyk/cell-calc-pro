@@ -4,36 +4,80 @@ import math
 # --- 1. アプリ基本設定 ---
 st.set_page_config(page_title="Cell Stock & Seeding Manager", layout="centered", page_icon="🔬")
 
-# --- 2. カスタムCSS（究極のスマホ最適化） ---
+# --- 2. カスタムCSS（究極のスマホ最適化・レイアウト修正版） ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap');
 
     /* =========================================================
-       【究極】スマホ強制横並び ＆ はみ出し完全ブロック
+       【修正版】スマホ強制横並び ＆ はみ出し完全ブロック
+       修正箇所: flex-basis を 50% → 0% に変更
+                 入力要素に min-width: 0 を追加
     ========================================================= */
     @media (max-width: 768px) {
+
         div[data-testid="stHorizontalBlock"] {
             flex-direction: row !important;
             flex-wrap: nowrap !important;
             gap: 8px !important;
+            overflow: hidden !important;
+            width: 100% !important;
+            box-sizing: border-box !important;
         }
+
+        /* flex-basis を 0% にするのが核心。
+           50% だと gap 分が加算されて合計 100% を超えてしまう。 */
         div[data-testid="column"] {
-            width: 50% !important;
-            flex: 1 1 50% !important;
+            flex: 1 1 0% !important;
             min-width: 0 !important;
-            overflow: hidden !important; /* 絶対にはみ出させない */
+            overflow: hidden !important;
+            box-sizing: border-box !important;
+        }
+
+        /* input 要素自体のはみ出し防止 */
+        div[data-testid="column"] input {
+            width: 100% !important;
+            min-width: 0 !important;
+            box-sizing: border-box !important;
+            font-size: 0.85rem !important;
+        }
+
+        /* baseweb の input ラッパー */
+        div[data-testid="column"] div[data-baseweb="input"] {
+            min-width: 0 !important;
+            width: 100% !important;
+        }
+
+        /* ステッパーボタン（＋ / −）をコンパクトに */
+        div[data-testid="column"] div[data-testid="stNumberInput"] button {
+            min-width: 26px !important;
+            width: 26px !important;
+            padding: 0 !important;
+            flex-shrink: 0 !important;
+        }
+
+        /* selectbox のはみ出し防止 */
+        div[data-testid="column"] div[data-baseweb="select"] {
+            min-width: 0 !important;
+            width: 100% !important;
+        }
+        div[data-testid="column"] div[data-baseweb="select"] > div {
+            min-width: 0 !important;
+            overflow: hidden !important;
+        }
+        div[data-testid="column"] div[data-baseweb="select"] span {
+            overflow: hidden !important;
+            text-overflow: ellipsis !important;
+            white-space: nowrap !important;
+            font-size: 0.82rem !important;
         }
     }
-    /* ========================================================= */
 
-    /* 全体の背景設定 */
+    /* ========================================================= */
     .stApp {
         background-color: #0d1117;
         color: #e6edf3 !important;
     }
-
-    /* タイトル */
     h1 {
         color: #58a6ff !important;
         font-family: 'Inter', sans-serif;
@@ -43,8 +87,6 @@ st.markdown("""
         margin-bottom: 20px !important;
         font-size: 1.6rem !important;
     }
-
-    /* セクションヘッダー */
     h2, h3 {
         color: #f0f6fc !important;
         font-size: 1.0rem !important;
@@ -55,14 +97,11 @@ st.markdown("""
         background: rgba(88, 166, 255, 0.05);
         border-radius: 4px;
     }
-
-    /* 入力ボックス */
     div[data-baseweb="input"], div[data-baseweb="select"] {
         background-color: #161b22 !important;
         border: 1px solid #30363d !important;
         border-radius: 6px !important;
     }
-    
     input {
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
@@ -70,8 +109,6 @@ st.markdown("""
         font-size: 0.9rem !important;
         padding: 2px 6px !important;
     }
-
-    /* ラベル（項目名） */
     label p {
         color: #8b949e !important;
         font-weight: 600 !important;
@@ -81,8 +118,6 @@ st.markdown("""
         overflow: hidden !important;
         text-overflow: ellipsis !important;
     }
-
-    /* 囲み枠 */
     div[data-testid="stVerticalBlockBorderWrapper"] {
         background-color: #161b22 !important;
         border: 1px solid #30363d !important;
@@ -90,8 +125,6 @@ st.markdown("""
         padding: 15px !important;
         margin-bottom: 10px !important;
     }
-
-    /* 指示バー */
     .ins-blue {
         background-color: #00d2ff !important;
         color: #000000 !important;
@@ -101,6 +134,7 @@ st.markdown("""
         margin: 5px 0;
         border-left: 8px solid #0095b6;
         font-size: 0.85rem;
+        word-break: break-word;
     }
     .ins-yellow {
         background-color: #ffd700 !important;
@@ -111,9 +145,8 @@ st.markdown("""
         margin: 5px 0;
         border-left: 8px solid #c5a000;
         font-size: 0.85rem;
+        word-break: break-word;
     }
-
-    /* 数値表示 */
     [data-testid="stMetricValue"] {
         font-family: 'JetBrains Mono', monospace !important;
         color: #58a6ff !important;
@@ -155,24 +188,23 @@ with st.container(border=True):
 # --- 3. まき直し設定 ---
 with st.container(border=True):
     st.subheader("3. まき直し設定")
-    
+
     col1, col2 = st.columns(2)
     with col1:
         dish_info = {"3 cm": 2.0, "6 cm": 4.0, "10 cm": 8.0}
         selected_size = st.selectbox("Dishサイズ", list(dish_info.keys()))
     with col2:
         dish_count = st.number_input("Dish枚数", value=1, min_value=1)
-    
+
     st.caption("1枚あたりの目標細胞数")
     col3, col4 = st.columns(2)
     with col3:
         d_coeff = st.number_input("細胞数", value=2.0, step=0.1, key="d_c")
     with col4:
         d_expo = st.number_input("× 10^x", value=6, step=1, key="d_e")
-    
+
     target_D = d_coeff * (10**d_expo)
     seeding_method = st.radio("まき方", ["方法1: 上乗せ", "方法2: 合計調整"], horizontal=True)
-
     required_seeding = target_D * dish_count
     total_cells = count_val * vol_val * 10000
 
@@ -197,23 +229,23 @@ if seeding_possible and density > 0:
         st.subheader("4. 凍結保存 (Stock)")
         rem_cells = total_cells - required_seeding
         st.latex(f"凍結可能数: {format_sci_latex(rem_cells)}")
-        
+
         col1, col2 = st.columns(2)
         with col1:
             stock_coeff = st.number_input("密度/tube", value=1.0, step=0.1)
         with col2:
             stock_expo = st.number_input("× 10^n", value=6, step=1)
-            
+
         vial_size_label = st.radio("分注量", ["0.5 mL", "1.0 mL"], horizontal=True)
         vial_size_ml = 0.5 if vial_size_label == "0.5 mL" else 1.0
-        
+
         per_vial = stock_coeff * (10**stock_expo)
         max_v = max(0, int(rem_cells // per_vial)) if per_vial > 0 else 0
-        
+
         if max_v > 0:
             st.write(f"最大本数: **{max_v} 本**")
             vial_count = st.number_input("作成数", value=max_v, min_value=0, max_value=max_v)
-            
+
             total_fm = vial_count * vial_size_ml
             st.markdown('<div class="ins-blue">◆ 凍結手順</div>', unsafe_allow_html=True)
             st.write(f"1. 残液を回収・遠心 ➔ 2. 凍結液 **{total_fm:.2f} mL** で懸濁 ➔ 3. **{vial_size_label}** ずつ分注")
@@ -221,5 +253,5 @@ if seeding_possible and density > 0:
         else:
             st.write("◇ 凍結不可")
             final_left = rem_cells
-            
+
         st.latex(f"最終廃棄分: {format_sci_latex(max(0.0, final_left))} \, [cells]")
