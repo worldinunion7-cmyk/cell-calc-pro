@@ -4,10 +4,23 @@ import math
 # --- 1. アプリ基本設定 ---
 st.set_page_config(page_title="Cell Stock & Seeding Manager", layout="centered", page_icon="🔬")
 
-# --- 2. カスタムCSS（コンパクト・高視認性設計） ---
+# --- 2. カスタムCSS（スマホでも強制的に横並びにする設定を追加） ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap');
+
+    /* --- スマホで縦に並んでしまうのを防ぐ強制横並びコード --- */
+    @media (max-width: 640px) {
+        div[data-testid="stHorizontalBlock"] {
+            flex-direction: row !important;
+            gap: 10px !important;
+        }
+        div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+            width: 50% !important;
+            flex: 1 1 0% !important;
+            min-width: 0 !important;
+        }
+    }
 
     /* 全体の背景設定 */
     .stApp {
@@ -26,7 +39,7 @@ st.markdown("""
         font-size: 1.8rem !important;
     }
 
-    /* セクションヘッダー：さらにコンパクトに */
+    /* セクションヘッダー */
     h2, h3 {
         color: #f0f6fc !important;
         font-size: 1.0rem !important;
@@ -38,8 +51,8 @@ st.markdown("""
         border-radius: 4px;
     }
 
-    /* 入力ボックス：白文字・暗い背景を維持 */
-    div[data-baseweb="input"] {
+    /* 入力ボックス */
+    div[data-baseweb="input"], div[data-baseweb="select"] {
         background-color: #161b22 !important;
         border: 1px solid #30363d !important;
         border-radius: 8px !important;
@@ -51,7 +64,7 @@ st.markdown("""
         font-family: 'JetBrains Mono', monospace !important;
     }
 
-    /* ラベル：さらに小さく */
+    /* ラベル */
     label p {
         color: #8b949e !important;
         font-weight: 600 !important;
@@ -59,7 +72,7 @@ st.markdown("""
         margin-bottom: 2px !important;
     }
 
-    /* 囲み枠の余白を詰める */
+    /* 囲み枠 */
     div[data-testid="stVerticalBlockBorderWrapper"] {
         background-color: #161b22 !important;
         border: 1px solid #30363d !important;
@@ -90,7 +103,7 @@ st.markdown("""
         font-size: 0.9rem;
     }
 
-    /* 数値表示（Metric）のサイズ調整 */
+    /* 数値表示 */
     [data-testid="stMetricValue"] {
         font-family: 'JetBrains Mono', monospace !important;
         color: #58a6ff !important;
@@ -129,11 +142,10 @@ with st.container(border=True):
     density = (count_val * vol_val * 10000) / res_vol if res_vol > 0 else 0
     st.latex(f"懸濁後の細胞密度: {format_sci_latex(density)} \, [cells/mL]")
 
-# --- 3. まき直し設定 (コンパクト化) ---
+# --- 3. まき直し設定 ---
 with st.container(border=True):
     st.subheader("3. まき直し設定")
     
-    # Dish設定を1列に
     col1, col2 = st.columns(2)
     with col1:
         dish_info = {"3 cm": 2.0, "6 cm": 4.0, "10 cm": 8.0}
@@ -141,7 +153,6 @@ with st.container(border=True):
     with col2:
         dish_count = st.number_input("Dish枚数", value=1, min_value=1)
     
-    # 目標細胞数の入力を1列に
     st.caption("1枚あたりの目標細胞数")
     col3, col4 = st.columns(2)
     with col3:
