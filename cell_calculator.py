@@ -185,8 +185,8 @@ with st.container(border=True):
     # selectbox に 60% を割り当てて "3 cm" が省略されないようにする
     col1, col2 = st.columns([3, 2])
     with col1:
-        dish_info = {"3 cm": 2.0, "6 cm": 4.0, "10 cm": 8.0}
-        selected_size = st.selectbox("Dishサイズ", list(dish_info.keys()))
+        dish_info = {"3": 2.0, "6": 4.0, "10": 8.0}
+        selected_size = st.selectbox("Dishサイズ (cm)", list(dish_info.keys()))
     with col2:
         dish_count = st.number_input("Dish枚数", value=1, min_value=1)
 
