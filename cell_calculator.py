@@ -42,10 +42,12 @@ st.markdown("""
             font-size: 0.82rem !important;
         }
 
-        /* ＋/－ ステッパーボタンをモバイルでは非表示
-           → 入力欄が広がり、直接タイプで使いやすくなる */
+        /* ＋/－ボタン：非表示をやめてコンパクトに表示 */
         div[data-testid="stHorizontalBlock"] div[data-testid="stNumberInput"] button {
-            display: none !important;
+            min-width: 22px !important;
+            width: 22px !important;
+            padding: 0 !important;
+            flex-shrink: 0 !important;
         }
 
         div[data-testid="stHorizontalBlock"] div[data-baseweb="select"] span {
@@ -182,8 +184,8 @@ with st.container(border=True):
 with st.container(border=True):
     st.subheader("3. まき直し設定")
 
-    # selectbox に 60% を割り当てて "3 cm" が省略されないようにする
-    col1, col2 = st.columns([3, 2])
+    # プルダウンを数字のみにしたので st.columns(2) で幅を統一
+    col1, col2 = st.columns(2)
     with col1:
         dish_info = {"3": 2.0, "6": 4.0, "10": 8.0}
         selected_size = st.selectbox("Dishサイズ (cm)", list(dish_info.keys()))
