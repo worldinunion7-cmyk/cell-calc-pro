@@ -3,69 +3,102 @@ import math
 # --- アプリ設定 ---
 st.set_page_config(page_title="Cell Seeding & Stock Manager", layout="centered", page_icon="🧬")
 
-# --- カスタムデザイン（ここを追加！） ---
+# --- カスタムCSS（視認性向上・スタイリッシュフォント） ---
 st.markdown("""
     <style>
-    /* メイン背景とフォントの設定 */
-    .stApp {
-        background-color: #0e1117;
-        color: #e0e0e0;
+    /* Google FontsからInterとJetBrains Monoを読み込み */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=JetBrains+Mono:wght@500&display=swap');
+
+    /* 全体のフォント設定 */
+    html, body, [class*="st-"] {
         font-family: 'Inter', sans-serif;
-    }
-    
-    /* カード（Container）のデザイン */
-    div[data-testid="stVerticalBlock"] > div:has(div[class*="stAlert"]),
-    div[data-testid="element-container"] .st-emotion-cache-12w0qpk {
-        background: rgba(255, 255, 255, 0.05);
-        border-radius: 15px;
-        padding: 20px;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        color: #FFFFFF !important; /* 基本の文字色を純白にして視認性UP */
     }
 
-    /* タイトルのグラデーション */
+    /* 背景色 */
+    .stApp {
+        background-color: #05070A;
+    }
+
+    /* タイトル：鮮やかなグラデーション */
     h1 {
-        background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+        background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         font-weight: 800 !important;
-        letter-spacing: -1px;
+        padding-bottom: 20px;
     }
 
-    /* 入力エリアのカスタマイズ */
-    .stNumberInput, .stSelectbox {
-        border-radius: 10px !important;
+    /* サブヘッダーの強調 */
+    h2, h3 {
+        color: #4facfe !important;
+        font-weight: 700 !important;
+        border-left: 4px solid #4facfe;
+        padding-left: 15px !important;
     }
 
-    /* メトリック（数値表示）の強調 */
+    /* カード（Container）のデザイン：透明感と立体感 */
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        background: rgba(255, 255, 255, 0.03) !important;
+        border: 1px solid rgba(255, 255, 255, 0.1) !important;
+        border-radius: 20px !important;
+        padding: 25px !important;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+        margin-bottom: 20px;
+    }
+
+    /* グレーで見えにくかったラベル（入力欄のタイトル）を明るく */
+    label p {
+        color: #B0C4DE !important; /* 明るいスチールブルー */
+        font-weight: 600 !important;
+        font-size: 0.95rem !important;
+    }
+
+    /* メトリック（計算結果）の数値を美しく */
     [data-testid="stMetricValue"] {
+        font-family: 'JetBrains Mono', monospace !important;
         color: #00f2fe !important;
-        font-family: 'Courier New', monospace;
+        font-weight: 700 !important;
     }
 
-    /* ボタンのスタイリッシュ化 */
+    /* LaTeX（数式）の視認性 */
+    .stLatex {
+        color: #FFFFFF !important;
+        background: rgba(0, 242, 254, 0.05);
+        padding: 10px;
+        border-radius: 10px;
+    }
+
+    /* ボタンをよりApple風のクリーンなデザインに */
     .stButton>button {
-        width: 100%;
-        border-radius: 25px;
-        background: linear-gradient(45deg, #00c6ff 0%, #0072ff 100%);
-        color: white;
-        border: none;
-        transition: 0.3s;
+        background: #4facfe !important;
+        color: white !important;
+        border-radius: 12px !important;
+        border: none !important;
+        font-weight: 700 !important;
+        height: 3em !important;
+        transition: all 0.2s ease-in-out !important;
     }
     .stButton>button:hover {
-        transform: scale(1.02);
-        box-shadow: 0 5px 15px rgba(0, 198, 255, 0.4);
+        background: #00f2fe !important;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
     }
 
-    /* LaTeXの数式を中央に */
-    .stLatex {
-        font-size: 1.1em;
-        margin: 15px 0;
+    /* スライダーや入力欄の背景 */
+    input {
+        background-color: rgba(255, 255, 255, 0.07) !important;
+        border-radius: 8px !important;
+    }
+
+    /* キャプション（注釈）の文字色を少し明るく */
+    .stCaption {
+        color: #94a3b8 !important;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 以下、前回のロジックを継続 ---
+# --- ここから下の計算ロジックはそのまま継続 ---
 st.title("🧬 Cell Stock & Seeding Manager")
 # (ここから下のカウント計算などのコードを続けてください)
 # --- 補助関数：科学的表記（LaTeX） ---
