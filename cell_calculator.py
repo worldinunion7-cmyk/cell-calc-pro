@@ -4,25 +4,26 @@ import math
 # --- 1. アプリ基本設定 ---
 st.set_page_config(page_title="Cell Stock & Seeding Manager", layout="centered", page_icon="🔬")
 
-# --- 2. カスタムCSS（はみ出し完全解決・入力欄圧縮版） ---
+# --- 2. カスタムCSS（究極のスマホ最適化） ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap');
 
     /* =========================================================
-       超強力：スマホ強制横並び ＆ はみ出し防止コード
+       【究極】スマホ強制横並び ＆ はみ出し完全ブロック
     ========================================================= */
-    div[data-testid="stHorizontalBlock"] {
-        display: flex !important;
-        flex-direction: row !important;
-        flex-wrap: nowrap !important;
-        gap: 8px !important; /* ボックス間の隙間 */
-        width: 100% !important;
-    }
-    div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-        width: 50% !important;
-        flex: 1 1 0% !important;
-        min-width: 0 !important; /* 画面外へのはみ出しを防ぐ絶対条件 */
+    @media (max-width: 768px) {
+        div[data-testid="stHorizontalBlock"] {
+            flex-direction: row !important;
+            flex-wrap: nowrap !important;
+            gap: 8px !important;
+        }
+        div[data-testid="column"] {
+            width: 50% !important;
+            flex: 1 1 50% !important;
+            min-width: 0 !important;
+            overflow: hidden !important; /* 絶対にはみ出させない */
+        }
     }
     /* ========================================================= */
 
@@ -40,7 +41,7 @@ st.markdown("""
         padding-bottom: 10px;
         border-bottom: 2px solid #30363d;
         margin-bottom: 20px !important;
-        font-size: 1.8rem !important;
+        font-size: 1.6rem !important;
     }
 
     /* セクションヘッダー */
@@ -55,29 +56,30 @@ st.markdown("""
         border-radius: 4px;
     }
 
-    /* 入力ボックス（長さを圧縮し、画面に収める） */
+    /* 入力ボックス */
     div[data-baseweb="input"], div[data-baseweb="select"] {
         background-color: #161b22 !important;
         border: 1px solid #30363d !important;
-        border-radius: 8px !important;
-        min-width: 0 !important; /* 入力欄が勝手に広がるのを防ぐ */
+        border-radius: 6px !important;
     }
     
     input {
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
         font-family: 'JetBrains Mono', monospace !important;
-        font-size: 0.9rem !important; /* スマホ用に少し小さく */
-        padding: 4px 8px !important; /* 内側の余白を削ってスリムに */
+        font-size: 0.9rem !important;
+        padding: 2px 6px !important;
     }
 
     /* ラベル（項目名） */
     label p {
         color: #8b949e !important;
         font-weight: 600 !important;
-        font-size: 0.75rem !important; /* スマホで1行に収まるように縮小 */
+        font-size: 0.75rem !important;
         margin-bottom: 2px !important;
-        white-space: nowrap !important; /* 文字の折り返しを防ぐ */
+        white-space: nowrap !important;
+        overflow: hidden !important;
+        text-overflow: ellipsis !important;
     }
 
     /* 囲み枠 */
