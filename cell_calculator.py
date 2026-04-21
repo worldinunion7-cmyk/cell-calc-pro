@@ -42,12 +42,21 @@ st.markdown("""
             font-size: 0.82rem !important;
         }
 
-        /* ＋/－ボタン：非表示をやめてコンパクトに表示 */
+        /* ＋/－ボタン：20px・小フォントでコンパクト表示 */
         div[data-testid="stHorizontalBlock"] div[data-testid="stNumberInput"] button {
-            min-width: 22px !important;
-            width: 22px !important;
+            min-width: 20px !important;
+            width: 20px !important;
             padding: 0 !important;
+            font-size: 0.6rem !important;
+            line-height: 1 !important;
             flex-shrink: 0 !important;
+        }
+
+        /* ── section 1 (カウント数・回収溶液量) のみボタン非表示 ──
+           :has() セレクタで .section1-marker を含む bordered container を特定 */
+        div[data-testid="stVerticalBlockBorderWrapper"]:has(.section1-marker)
+          div[data-testid="stNumberInput"] button {
+            display: none !important;
         }
 
         div[data-testid="stHorizontalBlock"] div[data-baseweb="select"] span {
@@ -166,6 +175,8 @@ st.title("🔬 Cell Seeding & Stock Manager")
 # --- 1. カウント結果 ---
 with st.container(border=True):
     st.subheader("1. カウント結果")
+    # ↓ :has() CSS のターゲット用マーカー（非表示）
+    st.markdown('<span class="section1-marker" style="display:none;"></span>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
         count_val = st.number_input("カウント数 (個/0.1mm³)", value=50, min_value=0, step=1)
@@ -184,7 +195,6 @@ with st.container(border=True):
 with st.container(border=True):
     st.subheader("3. まき直し設定")
 
-    # プルダウンを数字のみにしたので st.columns(2) で幅を統一
     col1, col2 = st.columns(2)
     with col1:
         dish_info = {"3": 2.0, "6": 4.0, "10": 8.0}
