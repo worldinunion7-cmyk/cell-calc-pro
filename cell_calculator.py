@@ -8,7 +8,6 @@ def format_sci_latex(val):
     coeff = val / (10**exponent)
     return f"{coeff:.2f} \\times 10^{{{exponent}}}"
 
-# 単位表示の切り替え関数
 def label_vol(v_ml):
     return f"{v_ml*1000:.1f} μL" if v_ml < 1 else f"{v_ml:.3f} mL"
 
@@ -21,23 +20,21 @@ with st.container(border=True):
     st.subheader("1. カウント結果")
     col_a, col_b = st.columns(2)
     with col_a:
-        # "A"を削除
         count_val = st.number_input("カウント数 (個/0.1mm³)", value=50, min_value=0, step=1)
     with col_b:
-        # "B"を削除
         vol_val = st.number_input("回収溶液量 (mL)", value=5, min_value=1, step=1)
     
     total_cells = count_val * vol_val * 10000
     st.latex(f"現在の総細胞数: {format_sci_latex(total_cells)} \, [cells]")
 
-# --- 2. 懸濁液の調製（まき直し用） ---
+# --- 2. 懸濁液の調製（マスターソリューション） ---
 with st.container(border=True):
     st.subheader("2. 懸濁液の調製")
+    # ここが「サクション後のペレットに加える量」になります
     resuspension_vol = st.number_input("ペレットに加える培地量 (mL)", value=5.0, min_value=0.1, step=0.1)
     
     if resuspension_vol > 0:
         density_val = total_cells / resuspension_vol
-        # 同一段に統一し、(C)を削除
         st.latex(f"懸濁後の細胞密度: {format_sci_latex(density_val)} \, [cells/mL]")
     else:
         density_val = 0
@@ -45,81 +42,77 @@ with st.container(border=True):
 # --- 3. まき直し設定 ---
 with st.container(border=True):
     st.subheader("3. まき直し設定")
+    
+    # Dishサイズと枚数
+    dish_info = {"3 cm": 2.0, "6 cm": 4.0, "10 cm": 8.0}
+    d_size_col, d_num_col = st.columns(2)
+    with d_size_col:
+        selected_size = st.selectbox("Dishサイズ", list(dish_info.keys()))
+    with d_num_col:
+        dish_count = st.number_input("Dish枚数", value=1, min_value=1)
+    
     st.write("1枚あたりの目標細胞数 (D)")
     c_col, e_col = st.columns([2, 1])
     with c_col:
         d_coeff = st.number_input("細胞数", value=2.0, step=0.1, key="d_c")
     with e_col:
         d_expo = st.number_input("× 10^x", value=6, step=1, key="d_e")
-        
     target_D = d_coeff * (10**d_expo)
-    st.latex(f"D = {format_sci_latex(target_D)} \, [cells/dish]")
 
-    dish_count = st.number_input("まくDishの枚数", value=1, min_value=1)
+    # まき方の選択
+    seeding_method = st.radio("まき方の選択", ["方法1: 規定量に上乗せ", "方法2: 合計量を規定量に合わせる"], horizontal=True)
+
     required_cells_seeding = target_D * dish_count
 
-    # エラーチェック
     if required_cells_seeding > total_cells:
         st.error(f"⚠️ 細胞が足りません！ (不足: {format_sci_latex(required_cells_seeding - total_cells)} 個)")
-        remaining_cells = 0
         seeding_possible = False
     else:
-        remaining_cells = total_cells - required_cells_seeding
         seeding_possible = True
-
-    if seeding_possible and density_val > 0:
-        vol_per_dish_mL = target_D / density_val
-        total_seeding_vol_mL = vol_per_dish_mL * dish_count
-        st.markdown("---")
-        st.success(f"✅ **分注量: {label_vol(vol_per_dish_mL)} / 枚**")
-        st.caption(f"(まき直し後の残液量: {max(0.0, resuspension_vol - total_seeding_vol_mL):.3f} mL)")
+        if density_val > 0:
+            vol_per_dish_mL = target_D / density_val
+            base_vol_standard = dish_info[selected_size]
+            
+            st.markdown("---")
+            if seeding_method == "方法1: 規定量に上乗せ":
+                pre_fill_vol = base_vol_standard
+                st.success(f"✅ **各Dishに培地を {pre_fill_vol} mL ずつ入れておく**")
+            else:
+                pre_fill_vol = base_vol_standard - vol_per_dish_mL
+                st.success(f"✅ **各Dishに培地を {pre_fill_vol:.3f} mL ずつ入れておく**")
+            
+            st.info(f"💡 **そこに細胞溶液を {label_vol(vol_per_dish_mL)} ずつ加える**")
 
 # --- 4. 凍結保存 (Stock) ---
 if seeding_possible and density_val > 0:
     with st.container(border=True):
         st.subheader("4. 凍結保存 (Stock)")
-        
-        # 余り細胞の表記をLaTeXで統一
+        remaining_cells = total_cells - required_cells_seeding
         st.latex(f"凍結可能細胞数: {format_sci_latex(remaining_cells)} \, [cells]")
         
         st.markdown("---")
-        st.write("**凍結条件の設定**")
-        v_col1, v_col2 = st.columns([2, 1])
+        v_col1, v_col2, v_col3 = st.columns([2, 1, 2])
         with v_col1:
             stock_coeff = st.number_input("目標密度 (個/tube)", value=1.0, step=0.1)
         with v_col2:
             stock_expo = st.number_input("× 10^n", value=6, step=1)
-        
-        cells_per_vial = stock_coeff * (10**stock_expo)
+        with v_col3:
+            vial_count = st.number_input("チューブ本数", value=0, min_value=0)
+            
         vial_size_label = st.radio("1本あたりの分注量", ["0.5 mL", "1.0 mL"], horizontal=True)
         vial_size_ml = 0.5 if vial_size_label == "0.5 mL" else 1.0
         
-        # 最大本数の算出
-        max_vials = max(0, int(remaining_cells // cells_per_vial)) if cells_per_vial > 0 else 0
+        max_vials = max(0, int(remaining_cells // (stock_coeff * 10**stock_expo))) if stock_coeff > 0 else 0
         
-        if max_vials > 0:
-            st.write(f"作製可能な最大本数: **{max_vials} 本**")
-            vial_count = st.number_input("実際に作成するチューブ本数", value=max_vials, min_value=0, max_value=max_vials)
-        else:
-            st.warning("余り細胞が目標密度に満たないため、凍結ストックは作製できません。")
-            vial_count = 0
-
-        st.markdown("---")
         if vial_count > 0:
-            # 凍結ありの場合
             total_freezing_medium = vial_count * vial_size_ml
-            used_stock_cells = cells_per_vial * vial_count
+            st.info(f"🧪 **凍結手順:**")
+            st.write(f"① 残液をすべて回収・遠心。")
+            st.write(f"② ペレットに **凍結溶液を {total_freezing_medium:.2f} mL** 加えて懸濁。")
+            st.write(f"③ 各チューブに **{vial_size_label}** ずつ分注。")
             
-            st.info(f"🧪 **凍結工程の手順:**")
-            st.write(f"① まき直し後の残液（約 **{max(0.0, resuspension_vol - total_seeding_vol_mL):.3f} mL**）をすべて回収し、遠心分離。")
-            st.write(f"② 上清を除去したペレットに **凍結溶液を {total_freezing_medium:.2f} mL 加えて再懸濁。**")
-            st.write(f"③ 各チューブに **{vial_size_label}** ずつ、計 **{vial_count} 本** に分注する。")
-            
-            # 廃棄分の表記をLaTeXで統一
-            final_leftover_cells = remaining_cells - used_stock_cells
-            st.latex(f"最終的な廃棄分: {format_sci_latex(max(0.0, final_leftover_cells))} \, [cells]")
+            final_leftover = remaining_cells - (vial_count * stock_coeff * 10**stock_expo)
+            st.latex(f"最終的な廃棄分: {format_sci_latex(max(0.0, final_leftover))} \, [cells]")
         else:
-            # 凍結なしの場合
-            st.write("❄️ **凍結保存は行いません。**")
+            st.write("凍結なし")
             st.latex(f"最終的な廃棄分: {format_sci_latex(remaining_cells)} \, [cells]")
-            st.caption(f"(まき直し後の残液 {max(0.0, resuspension_vol - total_seeding_vol_mL):.3f} mL を廃棄)")
