@@ -1,6 +1,73 @@
 import streamlit as st
 import math
+# --- アプリ設定 ---
+st.set_page_config(page_title="Cell Seeding & Stock Manager", layout="centered", page_icon="🧬")
 
+# --- カスタムデザイン（ここを追加！） ---
+st.markdown("""
+    <style>
+    /* メイン背景とフォントの設定 */
+    .stApp {
+        background-color: #0e1117;
+        color: #e0e0e0;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* カード（Container）のデザイン */
+    div[data-testid="stVerticalBlock"] > div:has(div[class*="stAlert"]),
+    div[data-testid="element-container"] .st-emotion-cache-12w0qpk {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        padding: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+    }
+
+    /* タイトルのグラデーション */
+    h1 {
+        background: linear-gradient(90deg, #4facfe 0%, #00f2fe 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 800 !important;
+        letter-spacing: -1px;
+    }
+
+    /* 入力エリアのカスタマイズ */
+    .stNumberInput, .stSelectbox {
+        border-radius: 10px !important;
+    }
+
+    /* メトリック（数値表示）の強調 */
+    [data-testid="stMetricValue"] {
+        color: #00f2fe !important;
+        font-family: 'Courier New', monospace;
+    }
+
+    /* ボタンのスタイリッシュ化 */
+    .stButton>button {
+        width: 100%;
+        border-radius: 25px;
+        background: linear-gradient(45deg, #00c6ff 0%, #0072ff 100%);
+        color: white;
+        border: none;
+        transition: 0.3s;
+    }
+    .stButton>button:hover {
+        transform: scale(1.02);
+        box-shadow: 0 5px 15px rgba(0, 198, 255, 0.4);
+    }
+
+    /* LaTeXの数式を中央に */
+    .stLatex {
+        font-size: 1.1em;
+        margin: 15px 0;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+# --- 以下、前回のロジックを継続 ---
+st.title("🧬 Cell Stock & Seeding Manager")
+# (ここから下のカウント計算などのコードを続けてください)
 # --- 補助関数：科学的表記（LaTeX） ---
 def format_sci_latex(val):
     if val <= 0: return "0"
