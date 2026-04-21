@@ -1,10 +1,10 @@
 import streamlit as st
 import math
 
-# --- 1. アプリ基本設定 (必ず一番上に1回) ---
+# --- 1. アプリ基本設定 ---
 st.set_page_config(page_title="Cell Stock & Seeding Manager", layout="centered", page_icon="🔬")
 
-# --- 2. カスタムCSS (エラー防止・視認性重視) ---
+# --- 2. カスタムCSS（コンパクト・高視認性設計） ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap');
@@ -20,24 +20,25 @@ st.markdown("""
         color: #58a6ff !important;
         font-family: 'Inter', sans-serif;
         font-weight: 800 !important;
-        padding-bottom: 15px;
+        padding-bottom: 10px;
         border-bottom: 2px solid #30363d;
-        margin-bottom: 30px !important;
+        margin-bottom: 20px !important;
+        font-size: 1.8rem !important;
     }
 
-    /* セクションヘッダー */
+    /* セクションヘッダー：さらにコンパクトに */
     h2, h3 {
         color: #f0f6fc !important;
-        font-size: 1.1rem !important;
+        font-size: 1.0rem !important;
         font-weight: 600 !important;
-        margin-top: 10px !important;
+        margin-top: 5px !important;
         border-left: 3px solid #58a6ff;
-        padding-left: 12px !important;
+        padding-left: 10px !important;
         background: rgba(88, 166, 255, 0.05);
         border-radius: 4px;
     }
 
-    /* 入力ボックスの設定 (白文字・暗い背景) */
+    /* 入力ボックス：白文字・暗い背景を維持 */
     div[data-baseweb="input"] {
         background-color: #161b22 !important;
         border: 1px solid #30363d !important;
@@ -50,57 +51,50 @@ st.markdown("""
         font-family: 'JetBrains Mono', monospace !important;
     }
 
-    /* ラベルの色 */
+    /* ラベル：さらに小さく */
     label p {
         color: #8b949e !important;
         font-weight: 600 !important;
+        font-size: 0.8rem !important;
+        margin-bottom: 2px !important;
     }
 
-    /* 囲み枠のデザイン */
+    /* 囲み枠の余白を詰める */
     div[data-testid="stVerticalBlockBorderWrapper"] {
         background-color: #161b22 !important;
         border: 1px solid #30363d !important;
-        border-radius: 12px !important;
-        padding: 25px !important;
-        margin-bottom: 20px;
+        border-radius: 10px !important;
+        padding: 15px !important;
+        margin-bottom: 10px !important;
     }
 
-    /* 指示バー (ハイコントラスト) */
+    /* 指示バー */
     .ins-blue {
         background-color: #00d2ff !important;
         color: #000000 !important;
-        padding: 15px;
-        border-radius: 8px;
+        padding: 10px;
+        border-radius: 6px;
         font-weight: 800;
-        margin: 10px 0;
-        border-left: 10px solid #0095b6;
+        margin: 5px 0;
+        border-left: 8px solid #0095b6;
+        font-size: 0.9rem;
     }
     .ins-yellow {
         background-color: #ffd700 !important;
         color: #000000 !important;
-        padding: 15px;
-        border-radius: 8px;
+        padding: 10px;
+        border-radius: 6px;
         font-weight: 800;
-        margin: 10px 0;
-        border-left: 10px solid #c5a000;
+        margin: 5px 0;
+        border-left: 8px solid #c5a000;
+        font-size: 0.9rem;
     }
 
-    /* ボタン */
-    .stButton>button {
-        background-color: #238636 !important;
-        color: white !important;
-        border-radius: 8px !important;
-        width: 100%;
-        font-weight: 700 !important;
-        height: 3em !important;
-    }
-
-    /* 数式(LaTeX) */
-    .stLatex {
-        background-color: #0d1117 !important;
-        padding: 15px;
-        border-radius: 8px;
-        border: 1px solid #30363d;
+    /* 数値表示（Metric）のサイズ調整 */
+    [data-testid="stMetricValue"] {
+        font-family: 'JetBrains Mono', monospace !important;
+        color: #58a6ff !important;
+        font-size: 1.4rem !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -121,109 +115,90 @@ st.title("🔬 Cell Seeding & Stock Manager")
 # --- 1. カウント結果 ---
 with st.container(border=True):
     st.subheader("1. カウント結果")
-    col_a, col_b = st.columns(2)
-    with col_a:
+    col1, col2 = st.columns(2)
+    with col1:
         count_val = st.number_input("カウント数 (個/0.1mm³)", value=50, min_value=0, step=1)
-    with col_b:
+    with col2:
         vol_val = st.number_input("回収溶液量 (mL)", value=5, min_value=1, step=1)
-    
-    total_cells = count_val * vol_val * 10000
-    st.latex(f"現在の総細胞数: {format_sci_latex(total_cells)} \, [cells]")
+    st.latex(f"現在の総細胞数: {format_sci_latex(count_val * vol_val * 10000)}")
 
 # --- 2. 懸濁液の調製 ---
 with st.container(border=True):
     st.subheader("2. 懸濁液の調製")
-    resuspension_vol = st.number_input("ペレットに加える培地量 (mL)", value=5.0, min_value=0.1, step=0.1)
-    
-    if resuspension_vol > 0:
-        density_val = total_cells / resuspension_vol
-        st.latex(f"懸濁後の細胞密度: {format_sci_latex(density_val)} \, [cells/mL]")
-    else:
-        density_val = 0
+    res_vol = st.number_input("ペレットに加える培地量 (mL)", value=5.0, min_value=0.1, step=0.1)
+    density = (count_val * vol_val * 10000) / res_vol if res_vol > 0 else 0
+    st.latex(f"懸濁後の細胞密度: {format_sci_latex(density)} \, [cells/mL]")
 
-# --- 3. まき直し設定 ---
+# --- 3. まき直し設定 (コンパクト化) ---
 with st.container(border=True):
     st.subheader("3. まき直し設定")
     
-    dish_info = {"3 cm": 2.0, "6 cm": 4.0, "10 cm": 8.0}
-    d_size_col, d_num_col = st.columns(2)
-    with d_size_col:
+    # Dish設定を1列に
+    col1, col2 = st.columns(2)
+    with col1:
+        dish_info = {"3 cm": 2.0, "6 cm": 4.0, "10 cm": 8.0}
         selected_size = st.selectbox("Dishサイズ", list(dish_info.keys()))
-    with d_num_col:
+    with col2:
         dish_count = st.number_input("Dish枚数", value=1, min_value=1)
     
-    st.write("1枚あたりの目標細胞数 (D)")
-    c_col, e_col = st.columns([2, 1])
-    with c_col:
+    # 目標細胞数の入力を1列に
+    st.caption("1枚あたりの目標細胞数")
+    col3, col4 = st.columns(2)
+    with col3:
         d_coeff = st.number_input("細胞数", value=2.0, step=0.1, key="d_c")
-    with e_col:
+    with col4:
         d_expo = st.number_input("× 10^x", value=6, step=1, key="d_e")
+    
     target_D = d_coeff * (10**d_expo)
+    seeding_method = st.radio("まき方", ["方法1: 上乗せ", "方法2: 合計調整"], horizontal=True)
 
-    seeding_method = st.radio("まき方の選択", ["方法1: 規定量に上乗せ", "方法2: 合計量を規定量に合わせる"], horizontal=True)
+    required_seeding = target_D * dish_count
+    total_cells = count_val * vol_val * 10000
 
-    required_cells_seeding = target_D * dish_count
-
-    if required_cells_seeding > total_cells:
-        st.error(f"◆ 不足: {format_sci_latex(required_cells_seeding - total_cells)} 個")
+    if required_seeding > total_cells:
+        st.error(f"◆ 不足: {format_sci_latex(required_seeding - total_cells)} 個")
         seeding_possible = False
-        remaining_cells = 0
     else:
         seeding_possible = True
-        remaining_cells = total_cells - required_cells_seeding
-        if density_val > 0:
-            vol_per_dish_mL = target_D / density_val
-            base_vol_standard = dish_info[selected_size]
-            
+        if density > 0:
+            vol_per_dish = target_D / density
+            base_v = dish_info[selected_size]
             st.markdown("---")
-            if seeding_method == "方法1: 規定量に上乗せ":
-                pre_fill_vol = base_vol_standard
-                st.markdown(f'<div class="ins-blue">◆ 各Dishに培地を {pre_fill_vol} mL ずつ入れておく</div>', unsafe_allow_html=True)
+            if seeding_method == "方法1: 上乗せ":
+                st.markdown(f'<div class="ins-blue">◆ 各Dishに培地を {base_v} mL 入れておく</div>', unsafe_allow_html=True)
             else:
-                pre_fill_vol = base_vol_standard - vol_per_dish_mL
-                st.markdown(f'<div class="ins-blue">◆ 各Dishに培地を {pre_fill_vol:.3f} mL ずつ入れておく</div>', unsafe_allow_html=True)
-            
-            st.markdown(f'<div class="ins-yellow">◇ そこに細胞溶液を {label_vol(vol_per_dish_mL)} ずつ加える</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="ins-blue">◆ 各Dishに培地を {base_v - vol_per_dish:.3f} mL 入れておく</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="ins-yellow">◇ そこに細胞溶液を {label_vol(vol_per_dish)} ずつ加える</div>', unsafe_allow_html=True)
 
 # --- 4. 凍結保存 (Stock) ---
-if seeding_possible and density_val > 0:
+if seeding_possible and density > 0:
     with st.container(border=True):
         st.subheader("4. 凍結保存 (Stock)")
-        st.latex(f"凍結可能細胞数: {format_sci_latex(remaining_cells)} \, [cells]")
+        rem_cells = total_cells - required_seeding
+        st.latex(f"凍結可能数: {format_sci_latex(rem_cells)}")
         
-        st.markdown("---")
-        v_col1, v_col2 = st.columns([2, 1])
-        with v_col1:
-            stock_coeff = st.number_input("目標密度 (個/tube)", value=1.0, step=0.1)
-        with v_col2:
+        col1, col2 = st.columns(2)
+        with col1:
+            stock_coeff = st.number_input("密度/tube", value=1.0, step=0.1)
+        with col2:
             stock_expo = st.number_input("× 10^n", value=6, step=1)
             
-        cells_per_vial = stock_coeff * (10**stock_expo)
-        vial_size_label = st.radio("1本あたりの分注量", ["0.5 mL", "1.0 mL"], horizontal=True)
+        vial_size_label = st.radio("分注量", ["0.5 mL", "1.0 mL"], horizontal=True)
         vial_size_ml = 0.5 if vial_size_label == "0.5 mL" else 1.0
         
-        max_vials = max(0, int(remaining_cells // cells_per_vial)) if cells_per_vial > 0 else 0
+        per_vial = stock_coeff * (10**stock_expo)
+        max_v = max(0, int(rem_cells // per_vial)) if per_vial > 0 else 0
         
-        if max_vials > 0:
-            st.write(f"作製可能な最大本数: **{max_vials} 本**")
-            vial_count = st.number_input("実際に作成するチューブ本数", value=max_vials, min_value=0, max_value=max_vials)
+        if max_v > 0:
+            st.write(f"最大本数: **{max_v} 本**")
+            vial_count = st.number_input("作成数", value=max_v, min_value=0, max_value=max_v)
+            
+            total_fm = vial_count * vial_size_ml
+            st.markdown('<div class="ins-blue">◆ 凍結手順</div>', unsafe_allow_html=True)
+            st.write(f"1. 残液を回収・遠心 ➔ 2. 凍結液 **{total_fm:.2f} mL** で懸濁 ➔ 3. **{vial_size_label}** ずつ分注")
+            final_left = rem_cells - (vial_count * per_vial)
         else:
-            st.write("余り細胞が目標密度に満たないため、ストック作製不可")
-            vial_count = 0
-
-        st.markdown("---")
-        if vial_count > 0:
-            total_freezing_medium = vial_count * vial_size_ml
-            used_stock_cells = cells_per_vial * vial_count
+            st.write("◇ 凍結不可")
+            final_left = rem_cells
             
-            st.markdown('<div class="ins-blue">◆ 凍結工程の手順</div>', unsafe_allow_html=True)
-            st.write(f"1. まき直し後の残液（約 {max(0.0, resuspension_vol - (vol_per_dish_mL * dish_count)):.3f} mL）を回収・遠心。")
-            st.write(f"2. ペレットに **凍結溶液を {total_freezing_medium:.2f} mL 加えて再懸濁。**")
-            st.write(f"3. 各チューブに **{vial_size_label}** ずつ、計 **{vial_count} 本** に分注。")
-            
-            final_leftover = remaining_cells - used_stock_cells
-        else:
-            st.write("◇ 凍結保存は行いません")
-            final_leftover = remaining_cells
-            
-        st.latex(f"最終的な廃棄分: {format_sci_latex(max(0.0, final_leftover))} \, [cells]")
+        st.latex(f"最終廃棄分: {format_sci_latex(max(0.0, final_left))} \, [cells]")
