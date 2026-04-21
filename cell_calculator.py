@@ -4,7 +4,7 @@ import math
 # --- 1. アプリ基本設定 ---
 st.set_page_config(page_title="Cell Stock & Seeding Manager", layout="centered", page_icon="🔬")
 
-# --- 2. カスタムCSS（視認性向上・ソリッドデザイン） ---
+# --- 2. カスタムCSS（視認性・ハイコントラスト設計） ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap');
@@ -12,7 +12,7 @@ st.markdown("""
     /* 全体のダークトーン設定 */
     .stApp {
         background-color: #0d1117;
-        color: #c9d1d9 !important;
+        color: #e6edf3 !important;
     }
 
     /* タイトル：境界線を引いたソリッドなデザイン */
@@ -22,79 +22,98 @@ st.markdown("""
         font-weight: 800 !important;
         letter-spacing: -0.05em;
         padding-bottom: 15px;
-        border-bottom: 1px solid #30363d;
-        margin-bottom: 30px !important;
+        border-bottom: 2px solid #58a6ff;
+        margin-bottom: 40px !important;
     }
 
-    /* セクションヘッダー */
+    /* セクションヘッダー：視認性向上のための枠線 */
     h2, h3 {
         color: #f0f6fc !important;
-        font-size: 1.1rem !important;
-        font-weight: 600 !important;
-        margin-top: 10px !important;
-        border-left: 3px solid #58a6ff;
-        padding-left: 10px !important;
+        font-size: 1.15rem !important;
+        font-weight: 700 !important;
+        margin-top: 15px !important;
+        padding: 5px 12px !important;
+        background: rgba(88, 166, 255, 0.1);
+        border-radius: 4px;
+        border-left: 5px solid #58a6ff;
     }
 
-    /* 入力ボックスの背景色と文字色の固定（白飛び防止） */
-    div[data-baseweb="input"] {
-        background-color: #161b22 !important;
-        border: 1px solid #30363d !important;
-        border-radius: 6px !important;
+    /* 【重要】入力ボックス：文字を黒にして視認性を確保 */
+    input {
+        color: #000000 !important;
+        -webkit-text-fill-color: #000000 !important;
+        font-family: 'JetBrains Mono', monospace !important;
+        font-weight: 600 !important;
     }
     
-    input {
-        color: #ffffff !important;
-        -webkit-text-fill-color: #ffffff !important;
-        font-family: 'JetBrains Mono', monospace !important;
+    /* 入力エリアの背景（少し明るいグレーに固定） */
+    div[data-baseweb="input"] {
+        background-color: #f0f6fc !important;
+        border: 2px solid #30363d !important;
+        border-radius: 8px !important;
     }
 
-    /* ラベルの視認性 */
+    /* ラベルの視認性向上 */
     label p {
-        color: #8b949e !important;
-        font-weight: 500 !important;
-        font-size: 0.85rem !important;
+        color: #c9d1d9 !important;
+        font-weight: 600 !important;
+        font-size: 0.9rem !important;
+        margin-bottom: 8px !important;
     }
 
-    /* コンテナ（カード）のデザイン */
+    /* セクションごとの囲み（カード）をより明確に */
     div[data-testid="stVerticalBlockBorderWrapper"] {
         background-color: #161b22 !important;
-        border: 1px solid #30363d !important;
-        border-radius: 10px !important;
-        padding: 20px !important;
-        margin-bottom: 20px;
+        border: 1px solid #444c56 !important;
+        border-radius: 12px !important;
+        padding: 30px !important;
+        margin-bottom: 30px !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
     }
 
     /* 数値表示（Metric） */
     [data-testid="stMetricValue"] {
         font-family: 'JetBrains Mono', monospace !important;
         color: #58a6ff !important;
-        font-size: 1.7rem !important;
     }
 
-    /* ボタン：信頼感のあるソリッドなグリーン */
+    /* 指示バー（ハイコントラスト設定） */
+    .instruction-blue {
+        background-color: #00f2fe !important;
+        color: #000000 !important;
+        padding: 15px;
+        border-radius: 8px;
+        font-weight: 800;
+        margin: 10px 0;
+        border-left: 8px solid #00c6ff;
+    }
+    .instruction-yellow {
+        background-color: #fce38a !important;
+        color: #000000 !important;
+        padding: 15px;
+        border-radius: 8px;
+        font-weight: 800;
+        margin: 10px 0;
+        border-left: 8px solid #f39c12;
+    }
+
+    /* ボタン */
     .stButton>button {
         background-color: #238636 !important;
         color: white !important;
-        border-radius: 6px !important;
-        border: 1px solid rgba(240,246,252,0.1) !important;
-        width: 100%;
-        font-weight: 600 !important;
-        height: 2.8em !important;
+        border-radius: 8px !important;
+        font-weight: 700 !important;
+        height: 3em !important;
+        border: none !important;
     }
 
-    /* LaTeX表示エリア */
+    /* LaTeX（数式）の背景を少し明るくして読みやすく */
     .stLatex {
         background-color: #0d1117 !important;
-        padding: 12px;
-        border-radius: 6px;
-        border: 1px inset #30363d;
-        overflow-x: auto;
-    }
-
-    /* ラジオボタンなどの文字色 */
-    .stRadio label {
-        color: #c9d1d9 !important;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px solid #30363d;
+        color: #f0f6fc !important;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -172,12 +191,12 @@ with st.container(border=True):
             st.markdown("---")
             if seeding_method == "方法1: 規定量に上乗せ":
                 pre_fill_vol = base_vol_standard
-                st.info(f"◆ 各Dishに培地を **{pre_fill_vol} mL** ずつ入れておく")
+                st.markdown(f'<div class="instruction-blue">◆ 各Dishに培地を {pre_fill_vol} mL ずつ入れておく</div>', unsafe_allow_html=True)
             else:
                 pre_fill_vol = base_vol_standard - vol_per_dish_mL
-                st.info(f"◆ 各Dishに培地を **{pre_fill_vol:.3f} mL** ずつ入れておく")
+                st.markdown(f'<div class="instruction-blue">◆ 各Dishに培地を {pre_fill_vol:.3f} mL ずつ入れておく</div>', unsafe_allow_html=True)
             
-            st.warning(f"◇ そこに細胞溶液を **{label_vol(vol_per_dish_mL)}** ずつ加える")
+            st.markdown(f'<div class="instruction-yellow">◇ そこに細胞溶液を {label_vol(vol_per_dish_mL)} ずつ加える</div>', unsafe_allow_html=True)
 
 # --- 4. 凍結保存 (Stock) ---
 if seeding_possible and density_val > 0:
@@ -210,7 +229,7 @@ if seeding_possible and density_val > 0:
             total_freezing_medium = vial_count * vial_size_ml
             used_stock_cells = cells_per_vial * vial_count
             
-            st.info(f"◆ 凍結工程の手順")
+            st.markdown('<div class="instruction-blue">◆ 凍結工程の手順</div>', unsafe_allow_html=True)
             st.write(f"1. まき直し後の残液（約 {max(0.0, resuspension_vol - (vol_per_dish_mL * dish_count)):.3f} mL）を回収・遠心。")
             st.write(f"2. ペレットに **凍結溶液を {total_freezing_medium:.2f} mL 加えて再懸濁。**")
             st.write(f"3. 各チューブに **{vial_size_label}** ずつ、計 **{vial_count} 本** に分注。")
