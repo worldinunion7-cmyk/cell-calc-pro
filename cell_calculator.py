@@ -4,68 +4,53 @@ import math
 # --- 1. アプリ基本設定 ---
 st.set_page_config(page_title="Cell Stock & Seeding Manager", layout="centered", page_icon="🔬")
 
-# --- 2. カスタムCSS（究極のスマホ最適化・レイアウト修正版） ---
+# --- 2. カスタムCSS ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap');
 
     /* =========================================================
-       【修正版】スマホ強制横並び ＆ はみ出し完全ブロック
-       修正箇所: flex-basis を 50% → 0% に変更
-                 入力要素に min-width: 0 を追加
+       【最終修正版】スマホ強制横並び ＆ はみ出し完全ブロック
     ========================================================= */
     @media (max-width: 768px) {
 
         div[data-testid="stHorizontalBlock"] {
+            display: flex !important;
             flex-direction: row !important;
             flex-wrap: nowrap !important;
-            gap: 8px !important;
+            gap: 4px !important;
             overflow: hidden !important;
             width: 100% !important;
-            box-sizing: border-box !important;
         }
 
-        /* flex-basis を 0% にするのが核心。
-           50% だと gap 分が加算されて合計 100% を超えてしまう。 */
+        div[data-testid="stHorizontalBlock"] > div,
         div[data-testid="column"] {
-            flex: 1 1 0% !important;
+            flex: 1 1 0 !important;
             min-width: 0 !important;
             overflow: hidden !important;
             box-sizing: border-box !important;
         }
 
-        /* input 要素自体のはみ出し防止 */
-        div[data-testid="column"] input {
+        /* 核心: カラム内の全 div の min-width を一括解除 */
+        div[data-testid="stHorizontalBlock"] div {
+            min-width: 0 !important;
+        }
+
+        div[data-testid="stHorizontalBlock"] input {
             width: 100% !important;
             min-width: 0 !important;
             box-sizing: border-box !important;
-            font-size: 0.85rem !important;
+            font-size: 0.82rem !important;
         }
 
-        /* baseweb の input ラッパー */
-        div[data-testid="column"] div[data-baseweb="input"] {
-            min-width: 0 !important;
-            width: 100% !important;
-        }
-
-        /* ステッパーボタン（＋ / −）をコンパクトに */
-        div[data-testid="column"] div[data-testid="stNumberInput"] button {
+        div[data-testid="stHorizontalBlock"] button {
             min-width: 26px !important;
             width: 26px !important;
             padding: 0 !important;
             flex-shrink: 0 !important;
         }
 
-        /* selectbox のはみ出し防止 */
-        div[data-testid="column"] div[data-baseweb="select"] {
-            min-width: 0 !important;
-            width: 100% !important;
-        }
-        div[data-testid="column"] div[data-baseweb="select"] > div {
-            min-width: 0 !important;
-            overflow: hidden !important;
-        }
-        div[data-testid="column"] div[data-baseweb="select"] span {
+        div[data-testid="stHorizontalBlock"] div[data-baseweb="select"] span {
             overflow: hidden !important;
             text-overflow: ellipsis !important;
             white-space: nowrap !important;
@@ -74,10 +59,12 @@ st.markdown("""
     }
 
     /* ========================================================= */
+
     .stApp {
         background-color: #0d1117;
         color: #e6edf3 !important;
     }
+
     h1 {
         color: #58a6ff !important;
         font-family: 'Inter', sans-serif;
@@ -87,6 +74,7 @@ st.markdown("""
         margin-bottom: 20px !important;
         font-size: 1.6rem !important;
     }
+
     h2, h3 {
         color: #f0f6fc !important;
         font-size: 1.0rem !important;
@@ -97,11 +85,13 @@ st.markdown("""
         background: rgba(88, 166, 255, 0.05);
         border-radius: 4px;
     }
+
     div[data-baseweb="input"], div[data-baseweb="select"] {
         background-color: #161b22 !important;
         border: 1px solid #30363d !important;
         border-radius: 6px !important;
     }
+
     input {
         color: #ffffff !important;
         -webkit-text-fill-color: #ffffff !important;
@@ -109,6 +99,7 @@ st.markdown("""
         font-size: 0.9rem !important;
         padding: 2px 6px !important;
     }
+
     label p {
         color: #8b949e !important;
         font-weight: 600 !important;
@@ -118,6 +109,7 @@ st.markdown("""
         overflow: hidden !important;
         text-overflow: ellipsis !important;
     }
+
     div[data-testid="stVerticalBlockBorderWrapper"] {
         background-color: #161b22 !important;
         border: 1px solid #30363d !important;
@@ -125,6 +117,7 @@ st.markdown("""
         padding: 15px !important;
         margin-bottom: 10px !important;
     }
+
     .ins-blue {
         background-color: #00d2ff !important;
         color: #000000 !important;
@@ -136,6 +129,7 @@ st.markdown("""
         font-size: 0.85rem;
         word-break: break-word;
     }
+
     .ins-yellow {
         background-color: #ffd700 !important;
         color: #000000 !important;
@@ -147,6 +141,7 @@ st.markdown("""
         font-size: 0.85rem;
         word-break: break-word;
     }
+
     [data-testid="stMetricValue"] {
         font-family: 'JetBrains Mono', monospace !important;
         color: #58a6ff !important;
@@ -189,7 +184,7 @@ with st.container(border=True):
 with st.container(border=True):
     st.subheader("3. まき直し設定")
 
-    col1, col2 = st.columns([2, 3])   # 左40% : 右60%
+    col1, col2 = st.columns(2)
     with col1:
         dish_info = {"3 cm": 2.0, "6 cm": 4.0, "10 cm": 8.0}
         selected_size = st.selectbox("Dishサイズ", list(dish_info.keys()))
