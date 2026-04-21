@@ -1,104 +1,102 @@
 import streamlit as st
 import math
-# --- アプリ設定 ---
-st.set_page_config(page_title="Cell Seeding & Stock Manager", layout="centered", page_icon="🧬")
+import streamlit as st
+import math
 
-# --- カスタムCSS（視認性向上・スタイリッシュフォント） ---
+# --- アプリ設定 ---
+st.set_page_config(page_title="Cell Susp Calc", layout="centered", page_icon="🔬")
+
+# --- カスタムCSS（視認性・プロデザイン重視） ---
 st.markdown("""
     <style>
-    /* Google FontsからInterとJetBrains Monoを読み込み */
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;700;800&family=JetBrains+Mono:wght@500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap');
 
-    /* 全体のフォント設定 */
-    html, body, [class*="st-"] {
-        font-family: 'Inter', sans-serif;
-        color: #FFFFFF !important; /* 基本の文字色を純白にして視認性UP */
-    }
-
-    /* 背景色 */
+    /* 全体のダークトーン設定 */
     .stApp {
-        background-color: #05070A;
+        background-color: #0d1117;
+        color: #c9d1d9 !important;
     }
 
-    /* タイトル：鮮やかなグラデーション */
+    /* タイトル：AIっぽさを消し、ソリッドなデザインに */
     h1 {
-        background: linear-gradient(135deg, #00f2fe 0%, #4facfe 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
+        color: #58a6ff !important;
+        font-family: 'Inter', sans-serif;
         font-weight: 800 !important;
-        padding-bottom: 20px;
+        letter-spacing: -0.05em;
+        padding-bottom: 10px;
+        border-bottom: 1px solid #30363d;
     }
 
-    /* サブヘッダーの強調 */
+    /* セクションヘッダー */
     h2, h3 {
-        color: #4facfe !important;
-        font-weight: 700 !important;
-        border-left: 4px solid #4facfe;
-        padding-left: 15px !important;
-    }
-
-    /* カード（Container）のデザイン：透明感と立体感 */
-    div[data-testid="stVerticalBlockBorderWrapper"] {
-        background: rgba(255, 255, 255, 0.03) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 20px !important;
-        padding: 25px !important;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
-        margin-bottom: 20px;
-    }
-
-    /* グレーで見えにくかったラベル（入力欄のタイトル）を明るく */
-    label p {
-        color: #B0C4DE !important; /* 明るいスチールブルー */
+        color: #f0f6fc !important;
+        font-size: 1.2rem !important;
         font-weight: 600 !important;
-        font-size: 0.95rem !important;
+        margin-top: 20px !important;
     }
 
-    /* メトリック（計算結果）の数値を美しく */
-    [data-testid="stMetricValue"] {
-        font-family: 'JetBrains Mono', monospace !important;
-        color: #00f2fe !important;
-        font-weight: 700 !important;
-    }
-
-    /* LaTeX（数式）の視認性 */
-    .stLatex {
-        color: #FFFFFF !important;
-        background: rgba(0, 242, 254, 0.05);
-        padding: 10px;
-        border-radius: 10px;
-    }
-
-    /* ボタンをよりApple風のクリーンなデザインに */
-    .stButton>button {
-        background: #4facfe !important;
-        color: white !important;
-        border-radius: 12px !important;
-        border: none !important;
-        font-weight: 700 !important;
-        height: 3em !important;
-        transition: all 0.2s ease-in-out !important;
-    }
-    .stButton>button:hover {
-        background: #00f2fe !important;
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(79, 172, 254, 0.4);
-    }
-
-    /* スライダーや入力欄の背景 */
-    input {
-        background-color: rgba(255, 255, 255, 0.07) !important;
+    /* 【重要】入力ボックスの視認性修正 */
+    div[data-baseweb="input"] {
+        background-color: #161b22 !important; /* 暗い背景 */
+        border: 1px solid #30363d !important; /* 境界線を明確に */
         border-radius: 8px !important;
     }
+    
+    input {
+        color: #ffffff !important; /* 文字を純白に */
+        -webkit-text-fill-color: #ffffff !important;
+    }
 
-    /* キャプション（注釈）の文字色を少し明るく */
-    .stCaption {
-        color: #94a3b8 !important;
+    /* ラベルの視認性（スチールブルー） */
+    label p {
+        color: #8b949e !important;
+        font-weight: 500 !important;
+        font-size: 0.9rem !important;
+    }
+
+    /* コンテナ（カード）をフラットでプロ向けのデザインに */
+    div[data-testid="stVerticalBlockBorderWrapper"] {
+        background-color: #161b22 !important;
+        border: 1px solid #30363d !important;
+        border-radius: 12px !important;
+        padding: 20px !important;
+        margin-bottom: 15px;
+    }
+
+    /* メトリック数値を「計測機器」風に */
+    [data-testid="stMetricValue"] {
+        font-family: 'JetBrains Mono', monospace !important;
+        color: #58a6ff !important;
+        font-size: 1.8rem !important;
+    }
+
+    /* ボタン：グラデーションを廃止し、ソリッドで信頼感のある青に */
+    .stButton>button {
+        background-color: #238636 !important; /* 成功・確定を意味するグリーン */
+        color: white !important;
+        border: 1px solid rgba(240,246,252,0.1) !important;
+        border-radius: 6px !important;
+        width: 100%;
+        font-weight: 600 !important;
+    }
+    
+    /* スライダー */
+    .stSlider {
+        padding-top: 20px;
+    }
+
+    /* 数式エリア */
+    .stLatex {
+        background-color: #0d1117 !important;
+        padding: 15px;
+        border-radius: 8px;
+        border: 1px inset #30363d;
     }
     </style>
     """, unsafe_allow_html=True)
 
-# --- ここから下の計算ロジックはそのまま継続 ---
+# --- 以下、ロジック部分は前回のまま ---
+st.title("🔬 Cell Seeding & Stock Manager")
 st.title("🧬 Cell Stock & Seeding Manager")
 # (ここから下のカウント計算などのコードを続けてください)
 # --- 補助関数：科学的表記（LaTeX） ---
