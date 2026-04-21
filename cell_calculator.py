@@ -4,23 +4,27 @@ import math
 # --- 1. アプリ基本設定 ---
 st.set_page_config(page_title="Cell Stock & Seeding Manager", layout="centered", page_icon="🔬")
 
-# --- 2. カスタムCSS（スマホでも強制的に横並びにする設定を追加） ---
+# --- 2. カスタムCSS ---
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap');
 
-    /* --- スマホで縦に並んでしまうのを防ぐ強制横並びコード --- */
-    @media (max-width: 640px) {
-        div[data-testid="stHorizontalBlock"] {
-            flex-direction: row !important;
-            gap: 10px !important;
-        }
-        div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
-            width: 50% !important;
-            flex: 1 1 0% !important;
-            min-width: 0 !important;
-        }
+    /* =========================================================
+       超強力：スマホ強制横並びコード (絶対に2列を崩さない)
+    ========================================================= */
+    div[data-testid="stHorizontalBlock"] {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        gap: 10px !important;
+        width: 100% !important;
     }
+    div[data-testid="stHorizontalBlock"] > div[data-testid="column"] {
+        width: 50% !important;
+        min-width: 45% !important;
+        flex: 1 1 50% !important;
+    }
+    /* ========================================================= */
 
     /* 全体の背景設定 */
     .stApp {
