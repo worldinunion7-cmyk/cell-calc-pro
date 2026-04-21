@@ -10,7 +10,7 @@ st.markdown("""
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap');
 
     /* =========================================================
-       【最終修正版】スマホ強制横並び ＆ はみ出し完全ブロック
+       スマホ強制横並び ＆ はみ出し完全ブロック（最終版）
     ========================================================= */
     @media (max-width: 768px) {
 
@@ -25,13 +25,12 @@ st.markdown("""
 
         div[data-testid="stHorizontalBlock"] > div,
         div[data-testid="column"] {
-            flex: 1 1 0 !important;
             min-width: 0 !important;
             overflow: hidden !important;
             box-sizing: border-box !important;
         }
 
-        /* 核心: カラム内の全 div の min-width を一括解除 */
+        /* カラム内の全 div の min-width を一括解除 */
         div[data-testid="stHorizontalBlock"] div {
             min-width: 0 !important;
         }
@@ -43,11 +42,21 @@ st.markdown("""
             font-size: 0.82rem !important;
         }
 
-        div[data-testid="stHorizontalBlock"] button {
-            min-width: 26px !important;
-            width: 26px !important;
+        /* ＋/－ボタン：20px・小フォントでコンパクト表示 */
+        div[data-testid="stHorizontalBlock"] div[data-testid="stNumberInput"] button {
+            min-width: 20px !important;
+            width: 20px !important;
             padding: 0 !important;
+            font-size: 0.6rem !important;
+            line-height: 1 !important;
             flex-shrink: 0 !important;
+        }
+
+        /* ── section 1 (カウント数・回収溶液量) のみボタン非表示 ──
+           :has() セレクタで .section1-marker を含む bordered container を特定 */
+        div[data-testid="stVerticalBlockBorderWrapper"]:has(.section1-marker)
+          div[data-testid="stNumberInput"] button {
+            display: none !important;
         }
 
         div[data-testid="stHorizontalBlock"] div[data-baseweb="select"] span {
@@ -166,6 +175,8 @@ st.title("🔬 Cell Seeding & Stock Manager")
 # --- 1. カウント結果 ---
 with st.container(border=True):
     st.subheader("1. カウント結果")
+    # ↓ :has() CSS のターゲット用マーカー（非表示）
+    st.markdown('<span class="section1-marker" style="display:none;"></span>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
     with col1:
         count_val = st.number_input("カウント数 (個/0.1mm³)", value=50, min_value=0, step=1)
@@ -186,8 +197,8 @@ with st.container(border=True):
 
     col1, col2 = st.columns(2)
     with col1:
-        dish_info = {"3 cm": 2.0, "6 cm": 4.0, "10 cm": 8.0}
-        selected_size = st.selectbox("Dishサイズ", list(dish_info.keys()))
+        dish_info = {"3": 2.0, "6": 4.0, "10": 8.0}
+        selected_size = st.selectbox("Dishサイズ (cm)", list(dish_info.keys()))
     with col2:
         dish_count = st.number_input("Dish枚数", value=1, min_value=1)
 
@@ -250,4 +261,3 @@ if seeding_possible and density > 0:
             final_left = rem_cells
 
         st.latex(f"最終廃棄分: {format_sci_latex(max(0.0, final_left))} \, [cells]")
-        
