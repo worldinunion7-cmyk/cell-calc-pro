@@ -189,7 +189,7 @@ with st.container(border=True):
 with st.container(border=True):
     st.subheader("3. まき直し設定")
 
-    col1, col2 = st.columns(2)
+    col1, col2 = st.columns([2, 3])   # 左40% : 右60%
     with col1:
         dish_info = {"3 cm": 2.0, "6 cm": 4.0, "10 cm": 8.0}
         selected_size = st.selectbox("Dishサイズ", list(dish_info.keys()))
